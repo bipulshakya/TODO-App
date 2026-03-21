@@ -1,0 +1,48 @@
+{
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+  },
+  "name": "todo",
+  "homepage": "https://bipulshakya.github.io/TODO-App/",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "body-parser": "^1.20.3",
+    "browserslist": "^4.24.3",
+    "caniuse-lite": "^1.0.30001689",
+    "convert-source-map": "^2.0.0",
+    "cors": "^2.8.5",
+    "debug": "^4.4.0",
+    "electron-to-chromium": "^1.5.73",
+    "escalade": "^3.2.0",
+    "express": "^4.21.2",
+    "gensync": "^1.0.0-beta.2",
+    "gh-pages": "^6.3.0",
+    "globals": "^11.12.0",
+    "js-tokens": "^4.0.0",
+    "jsesc": "^3.1.0",
+    "json5": "^2.2.3",
+    "jsonwebtoken": "^9.0.3",
+    "lru-cache": "^5.1.1",
+    "ms": "^2.1.3",
+    "mysql2": "^3.12.0",
+    "node-releases": "^2.0.19",
+    "nodemon": "^3.1.9",
+    "picocolors": "^1.1.1",
+    "semver": "^6.3.1",
+    "update-browserslist-db": "^1.1.1",
+    "yallist": "^3.1.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
+
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": ""
+}
