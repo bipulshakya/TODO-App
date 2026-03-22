@@ -275,12 +275,56 @@ button:disabled {
   z-index: 100;
 }
 
+.app-navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
 .app-navbar-logo {
   font-size: 18px;
   font-weight: 800;
   letter-spacing: 2px;
   color: #fff;
   text-transform: uppercase;
+}
+
+.app-navbar-tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-tab {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+  box-shadow: none;
+}
+
+.nav-tab:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+  box-shadow: none;
+}
+
+.nav-tab.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.admin-tab {
+  color: #f39c12;
+}
+.admin-tab:hover, .admin-tab.active {
+  background: rgba(243, 156, 18, 0.15);
+  color: #f1c40f;
 }
 
 .app-navbar-user {

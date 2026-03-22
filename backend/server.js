@@ -4,7 +4,8 @@ const cors = require('cors');
 const db = require('./db');
 const taskRoutes = require('./routes/tasks');
 const authRoutes = require('./routes/auth');
-const { authMiddleware } = require('./middleware/auth');
+const adminRoutes = require('./routes/admin');
+const { authMiddleware, adminAuthMiddleware } = require('./middleware/auth');
 
 const app = express();
 app.use(cors());
@@ -16,6 +17,9 @@ app.use('/auth', authRoutes);
 // Protected task routes (require JWT)
 app.use('/tasks', authMiddleware, taskRoutes);
 
+// Protected admin routes (require Admin JWT)
+app.use('/admin', authMiddleware, adminAuthMiddleware, adminRoutes);
+
 const PORT = 5001;
 
 // Auto-create tables if they don't exist
@@ -26,6 +30,7 @@ async function initDB() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         username VARCHAR(100) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
+        is_admin BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -38,6 +43,16 @@ async function initDB() {
     if (columns.length === 0) {
       await db.query(`ALTER TABLE tasks ADD COLUMN user_id INT, ADD FOREIGN KEY (user_id) REFERENCES users(id)`);
       console.log('✅ Added user_id column to tasks table');
+    }
+
+    // Ensure users table actually has is_admin if it was created before this update
+    const [userColumns] = await db.query(`
+      SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'is_admin'
+    `);
+    if (userColumns.length === 0) {
+      await db.query(`ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT FALSE`);
+      console.log('✅ Added is_admin column to users table');
     }
 
     console.log('✅ Database tables ready');

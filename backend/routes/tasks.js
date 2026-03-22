@@ -2,6 +2,31 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+// Get task statistics for the logged-in user (Dashboard)
+router.get('/stats', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) as completed,
+        SUM(CASE WHEN in_progress = 1 AND completed = 0 THEN 1 ELSE 0 END) as in_progress
+      FROM tasks WHERE user_id = ?`,
+      [req.userId]
+    );
+    
+    const stats = rows[0];
+    res.json({
+      total: Number(stats.total || 0),
+      completed: Number(stats.completed || 0),
+      in_progress: Number(stats.in_progress || 0),
+      todo: Number(stats.total || 0) - Number(stats.completed || 0) - Number(stats.in_progress || 0)
+    });
+  } catch (error) {
+    console.error('Stats error:', error);
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+});
+
 // Get all tasks for the logged-in user
 router.get('/', async (req, res) => {
   try {

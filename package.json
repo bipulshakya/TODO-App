@@ -30,6 +30,7 @@
     "node-releases": "^2.0.19",
     "nodemon": "^3.1.9",
     "picocolors": "^1.1.1",
+    "react-scripts": "^5.0.1",
     "semver": "^6.3.1",
     "update-browserslist-db": "^1.1.1",
     "yallist": "^3.1.1"
@@ -39,7 +40,6 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },
-
   "keywords": [],
   "author": "",
   "license": "ISC",
