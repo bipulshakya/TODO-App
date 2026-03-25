@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import API_URL from '../config';
 import './TodoBoard.css';
 
 const COLUMN = { TODO: 'todo', IN_PROGRESS: 'inProgress', COMPLETED: 'completed' };
@@ -48,7 +49,7 @@ function TodoBoard({ token, handleLogout }) {
 
   const fetchTasks = async () => {
     try {
-      const response = await fetch('http://localhost:5001/tasks', { headers: authHeaders() });
+      const response = await fetch(`${API_URL}/tasks`, { headers: authHeaders() });
       if (response.status === 401) { handleLogout(); return; }
       const data = await response.json();
       setTasks(data);
@@ -60,7 +61,7 @@ function TodoBoard({ token, handleLogout }) {
   const addTask = async () => {
     if (newTask.trim() === '') return;
     try {
-      const response = await fetch('http://localhost:5001/tasks', {
+      const response = await fetch(`${API_URL}/tasks`, {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify({ text: newTask, description: newDescription, priority: newPriority }),
@@ -86,7 +87,7 @@ function TodoBoard({ token, handleLogout }) {
     const newCompleted = (task.inProgress || task.in_progress) && !task.completed ? true : false;
 
     try {
-      const response = await fetch(`http://localhost:5001/tasks/${taskId}`, {
+      const response = await fetch(`${API_URL}/tasks/${taskId}`, {
         method: 'PUT',
         headers: authHeaders(),
         body: JSON.stringify({
@@ -111,7 +112,7 @@ function TodoBoard({ token, handleLogout }) {
 
   const deleteTask = async (index, taskId) => {
     try {
-      const response = await fetch(`http://localhost:5001/tasks/${taskId}`, {
+      const response = await fetch(`${API_URL}/tasks/${taskId}`, {
         method: 'DELETE',
         headers: authHeaders()
       });
@@ -134,7 +135,7 @@ function TodoBoard({ token, handleLogout }) {
     if (editText.trim() === '') return;
     const task = tasks[editIndex];
     try {
-       const response = await fetch(`http://localhost:5001/tasks/${taskId}`, {
+       const response = await fetch(`${API_URL}/tasks/${taskId}`, {
         method: 'PUT',
         headers: authHeaders(),
         body: JSON.stringify({
@@ -182,7 +183,7 @@ function TodoBoard({ token, handleLogout }) {
     }
 
     try {
-      const response = await fetch(`http://localhost:5001/tasks/${task.id}`, {
+      const response = await fetch(`${API_URL}/tasks/${task.id}`, {
         method: 'PUT', headers: authHeaders(),
         body: JSON.stringify({ ...task, in_progress: newInProgress, completed: newCompleted })
       });

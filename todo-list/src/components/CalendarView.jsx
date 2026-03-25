@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import API_URL from '../config';
 import './CalendarView.css';
 
 function CalendarView({ token, handleLogout }) {
@@ -13,7 +14,7 @@ function CalendarView({ token, handleLogout }) {
 
   const fetchTasks = async () => {
     try {
-      const response = await fetch('http://localhost:5001/tasks', {
+      const response = await fetch(`${API_URL}/tasks`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`

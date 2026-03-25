@@ -20,7 +20,8 @@ app.use('/tasks', authMiddleware, taskRoutes);
 // Protected admin routes (require Admin JWT)
 app.use('/admin', authMiddleware, adminAuthMiddleware, adminRoutes);
 
-const PORT = 5001;
+require('dotenv').config();
+const PORT = process.env.PORT || 5001;
 
 // Auto-create tables if they don't exist
 async function initDB() {

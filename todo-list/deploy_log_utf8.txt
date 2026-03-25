@@ -1,0 +1,76 @@
+﻿node.exe : 
+(node:19268) 
+ExperimentalWarning: 
+CommonJS module C:\User
+s\acer\AppData\Roaming\
+npm\node_modules\npm\no
+de_modules\debug\src\no
+de.js is loading ES 
+Module C:\Users\acer\Ap
+pData\Roaming\npm\node_
+modules\npm\node_module
+s\supports-color\index.
+js using require().
+At C:\Program Files\nod
+ejs\npx.ps1:29 char:3
++   & $NODE_EXE 
+$NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: ((node:19268)    
+ Ex...sing require(    
+).:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+Support for loading ES 
+Module in require() is 
+an experimental 
+feature and might 
+change at any time
+(Use `node 
+--trace-warnings ...` 
+to show where the 
+warning was created)
+Error: spawn 
+ENAMETOOLONG
+    at 
+ChildProcess.spawn (nod
+e:internal/child_proces
+s:421:11)
+    at Object.spawn (no
+de:child_process:753:9)
+    at C:\Users\acer\De
+sktop\projects\todo\tod
+o-list\node_modules\gh-
+pages\lib\git.js:30:22
+    at new Promise 
+(<anonymous>)
+    at spawn (C:\Users\
+acer\Desktop\projects\t
+odo\todo-list\node_modu
+les\gh-pages\lib\git.js
+:29:10)
+    at Git.exec (C:\Use
+rs\acer\Desktop\project
+s\todo\todo-list\node_m
+odules\gh-pages\lib\git
+.js:69:10)
+    at Git.rm (C:\Users
+\acer\Desktop\projects\
+todo\todo-list\node_mod
+ules\gh-pages\lib\git.j
+s:146:15)
+    at C:\Users\acer\De
+sktop\projects\todo\tod
+o-list\node_modules\gh-
+pages\lib\index.js:188:
+22
+    at process.processT
+icksAndRejections (node
+:internal/process/task_
+queues:105:5)
