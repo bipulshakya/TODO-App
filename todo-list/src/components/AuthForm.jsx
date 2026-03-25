@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import API_URL from '../config';
 import './AuthForm.css';
 
 function AuthForm({ onAuthSuccess }) {
@@ -23,7 +24,7 @@ function AuthForm({ onAuthSuccess }) {
     const endpoint = mode === 'login' ? '/auth/login' : '/auth/register';
 
     try {
-      const response = await fetch(`http://localhost:5001${endpoint}`, {
+      const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),

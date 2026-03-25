@@ -20,7 +20,8 @@ app.use('/tasks', authMiddleware, taskRoutes);
 // Protected admin routes (require Admin JWT)
 app.use('/admin', authMiddleware, adminAuthMiddleware, adminRoutes);
 
-const PORT = 5001;
+require('dotenv').config();
+const PORT = process.env.PORT || 5001;
 
 // Auto-create tables if they don't exist
 async function initDB() {
@@ -43,6 +44,16 @@ async function initDB() {
     if (columns.length === 0) {
       await db.query(`ALTER TABLE tasks ADD COLUMN user_id INT, ADD FOREIGN KEY (user_id) REFERENCES users(id)`);
       console.log('✅ Added user_id column to tasks table');
+    }
+
+    // Add priority column to tasks if it doesn't already exist
+    const [priorityColumns] = await db.query(`
+      SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tasks' AND COLUMN_NAME = 'priority'
+    `);
+    if (priorityColumns.length === 0) {
+      await db.query(`ALTER TABLE tasks ADD COLUMN priority VARCHAR(20) DEFAULT 'Medium'`);
+      console.log('✅ Added priority column to tasks table');
     }
 
     // Ensure users table actually has is_admin if it was created before this update

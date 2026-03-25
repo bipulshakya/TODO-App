@@ -42,13 +42,15 @@ router.get('/', async (req, res) => {
 
 // Add new task for the logged-in user
 router.post('/', async (req, res) => {
-  const { text, description } = req.body;
+  const { text, description, priority } = req.body;
+  const taskPriority = priority || 'Medium';
+
   try {
     const [result] = await db.query(
-      'INSERT INTO tasks (text, description, user_id) VALUES (?, ?, ?)',
-      [text, description, req.userId]
+      'INSERT INTO tasks (text, description, priority, user_id) VALUES (?, ?, ?, ?)',
+      [text, description, taskPriority, req.userId]
     );
-    res.json({ id: result.insertId, text, description, completed: false, in_progress: false });
+    res.json({ id: result.insertId, text, description, priority: taskPriority, completed: false, in_progress: false });
   } catch (error) {
     res.status(500).json({ error: 'Failed to add task' });
   }
@@ -57,11 +59,13 @@ router.post('/', async (req, res) => {
 // Update task (only if owned by the logged-in user)
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const { text, description, completed, in_progress } = req.body;
+  const { text, description, completed, in_progress, priority } = req.body;
+  const taskPriority = priority || 'Medium';
+
   try {
     await db.query(
-      'UPDATE tasks SET text = ?, description = ?, completed = ?, in_progress = ? WHERE id = ? AND user_id = ?',
-      [text, description, completed, in_progress, id, req.userId]
+      'UPDATE tasks SET text = ?, description = ?, priority = ?, completed = ?, in_progress = ? WHERE id = ? AND user_id = ?',
+      [text, description, taskPriority, completed, in_progress, id, req.userId]
     );
     res.json({ message: 'Task updated successfully' });
   } catch (error) {

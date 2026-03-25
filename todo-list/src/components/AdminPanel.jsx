@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import API_URL from '../config';
 import './AdminPanel.css';
 
 function AdminPanel({ token, handleLogout, username }) {
@@ -12,7 +13,7 @@ function AdminPanel({ token, handleLogout, username }) {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://localhost:5001/admin/users', {
+      const response = await fetch(`${API_URL}/admin/users`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
@@ -43,7 +44,7 @@ function AdminPanel({ token, handleLogout, username }) {
     }
 
     try {
-      const response = await fetch(`http://localhost:5001/admin/users/${userId}`, {
+      const response = await fetch(`${API_URL}/admin/users/${userId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`
