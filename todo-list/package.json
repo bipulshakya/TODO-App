@@ -1,6 +1,6 @@
 {
   "name": "todo-list",
-  "homepage": "https://bipulshakya.github.io/TODO-App/",
+  "homepage": ".",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
