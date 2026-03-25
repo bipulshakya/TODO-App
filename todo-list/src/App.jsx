@@ -5,13 +5,14 @@ import AuthForm from './components/AuthForm';
 import TodoBoard from './components/TodoBoard';
 import Dashboard from './components/Dashboard';
 import AdminPanel from './components/AdminPanel';
+import CalendarView from './components/CalendarView';
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem('auth_token') || null);
   const [username, setUsername] = useState(() => localStorage.getItem('auth_username') || '');
   const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('auth_is_admin') === 'true');
   
-  // 'board', 'dashboard', 'admin'
+  // 'board', 'dashboard', 'admin', 'calendar'
   const [currentView, setCurrentView] = useState('board');
 
   const handleAuthSuccess = (newToken, newUsername, newIsAdmin) => {
@@ -38,6 +39,7 @@ function App() {
 
   const renderView = () => {
     if (currentView === 'dashboard') return <Dashboard token={token} handleLogout={handleLogout} />;
+    if (currentView === 'calendar') return <CalendarView token={token} handleLogout={handleLogout} />;
     if (currentView === 'admin' && isAdmin) return <AdminPanel token={token} handleLogout={handleLogout} username={username} />;
     return <TodoBoard token={token} handleLogout={handleLogout} />;
   };
@@ -47,7 +49,7 @@ function App() {
       {/* Dynamic Navbar with Tabs */}
       <div className="app-navbar">
         <div className="app-navbar-left">
-          <span className="app-navbar-logo">✅ TODO-LIST</span>
+          <span className="app-navbar-logo">Todo-List</span>
           <div className="app-navbar-tabs">
             <button 
               className={`nav-tab ${currentView === 'board' ? 'active' : ''}`}
@@ -60,6 +62,12 @@ function App() {
               onClick={() => setCurrentView('dashboard')}
             >
               Dashboard
+            </button>
+            <button 
+              className={`nav-tab ${currentView === 'calendar' ? 'active' : ''}`}
+              onClick={() => setCurrentView('calendar')}
+            >
+              Calendar
             </button>
             {isAdmin && (
               <button 

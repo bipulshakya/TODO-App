@@ -3,11 +3,11 @@
   max-width: 1000px;
   margin: 40px auto;
   padding: 30px;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(15, 20, 31, 0.4);
   backdrop-filter: blur(16px);
   border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
 }
 
 .admin-header {
@@ -17,65 +17,71 @@
 
 .admin-header h1 {
   font-size: 32px;
-  color: #c94b4b;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   margin-bottom: 8px;
 }
 
 .admin-header p {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 15px;
 }
 
 .admin-table-wrapper {
   overflow-x: auto;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--glass-border);
 }
 
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
 }
 
 .admin-table th {
-  background: #f8f9fa;
+  background: rgba(255,255,255,0.03);
   padding: 16px;
   text-align: left;
   font-size: 13px;
   font-weight: 700;
-  color: #555;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 2px solid #eaeaea;
+  border-bottom: 2px solid rgba(255,255,255,0.08);
 }
 
 .admin-table td {
   padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
   vertical-align: middle;
   font-size: 14px;
-  color: #444;
+  color: var(--text-secondary);
+  transition: background 0.2s ease;
 }
 
-.admin-table tr:hover {
-  background-color: #fcfcfc;
+.admin-table tr:hover td {
+  background-color: rgba(255,255,255,0.02);
 }
 
-.current-user-row {
-  background-color: #fff9e6 !important;
+.current-user-row td {
+  background-color: rgba(251, 191, 36, 0.05) !important;
 }
 
 .admin-td-username {
   font-weight: 600;
-  color: #222;
+  color: var(--text-primary);
 }
 
 .you-badge {
   font-size: 11px;
-  color: #f39c12;
+  color: #fbbf24;
   margin-left: 6px;
   font-weight: 800;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
 }
 
 .role-badge {
@@ -87,43 +93,44 @@
 }
 
 .role-admin {
-  background-color: #ffe0e0;
-  color: #d93025;
+  background-color: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
 }
 
 .role-user {
-  background-color: #e0f2fe;
-  color: #0284c7;
+  background-color: rgba(14, 165, 233, 0.15);
+  color: var(--accent-teal);
+  border: 1px solid rgba(14, 165, 233, 0.3);
 }
 
 .admin-td-tasks {
   font-family: monospace;
   font-size: 16px;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .delete-user-btn {
-  background: #fff;
-  color: #e74c3c;
-  border: 1px solid #facbc6;
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
   padding: 6px 14px;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: none;
 }
 
 .delete-user-btn:hover:not(:disabled) {
-  background: #e74c3c;
-  color: #fff;
-  border-color: #e74c3c;
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
   transform: translateY(-1px);
 }
 
 .delete-user-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.3;
   cursor: not-allowed;
   filter: grayscale(1);
 }
@@ -131,7 +138,7 @@
 .no-users {
   text-align: center;
   padding: 40px !important;
-  color: #888;
+  color: var(--text-muted);
   font-style: italic;
 }
 
@@ -139,6 +146,6 @@
   text-align: center;
   margin-top: 100px;
   font-size: 20px;
-  color: #c94b4b;
+  color: #fbbf24;
   animation: pulse 1.5s infinite;
 }

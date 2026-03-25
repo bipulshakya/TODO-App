@@ -45,6 +45,16 @@ async function initDB() {
       console.log('✅ Added user_id column to tasks table');
     }
 
+    // Add priority column to tasks if it doesn't already exist
+    const [priorityColumns] = await db.query(`
+      SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tasks' AND COLUMN_NAME = 'priority'
+    `);
+    if (priorityColumns.length === 0) {
+      await db.query(`ALTER TABLE tasks ADD COLUMN priority VARCHAR(20) DEFAULT 'Medium'`);
+      console.log('✅ Added priority column to tasks table');
+    }
+
     // Ensure users table actually has is_admin if it was created before this update
     const [userColumns] = await db.query(`
       SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
