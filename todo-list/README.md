@@ -65,6 +65,19 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/a
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
 
+## GitHub Pages (This Repository)
+
+This frontend is deployed from GitHub Actions using the workflow in `.github/workflows/deploy-pages.yml`.
+
+1. Push changes to the `main` branch.
+2. In GitHub, go to `Settings -> Pages`.
+3. Set `Source` to `GitHub Actions`.
+4. Wait for the `Deploy Frontend To GitHub Pages` workflow to finish.
+
+Site URL:
+
+- https://bipulshakya.github.io/TODO-App/
+
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
