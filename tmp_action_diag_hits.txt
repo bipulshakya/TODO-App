@@ -1,0 +1,2 @@
+C:\Users\acer\.vscode\extensions\github.vscode-github-actions-0.31.2\dist\server-node.js:1
+C:\Users\acer\.vscode\extensions\github.vscode-github-actions-0.31.2\dist\server-web.js:2

@@ -14,7 +14,7 @@ router.post('/register', async (req, res) => {
   if (password.length < 6) {
     return res.status(400).json({ error: 'Password must be at least 6 characters.' });
   }
-  
+
   const safeUsername = username.toLowerCase().trim();
 
   try {
@@ -50,7 +50,7 @@ router.post('/login', async (req, res) => {
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password are required.' });
   }
-  
+
   const safeUsername = username.toLowerCase().trim();
 
   try {
