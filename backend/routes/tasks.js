@@ -4,10 +4,12 @@ const db = require('../db');
 
 // Helper: normalize deadline — empty string or falsy → null
 function normalizeDeadline(val) {
-  if (!val || val.trim() === '') return null;
-  // If date string is invalid (e.g., user typed incomplete date), force null to prevent SQL crash
-  if (isNaN(new Date(val).getTime())) return null;
-  return val;
+  if (!val || typeof val !== 'string' || val.trim() === '') return null;
+  const parsed = new Date(val);
+  if (isNaN(parsed.getTime())) return null;
+  
+  const pad = (n) => n.toString().padStart(2, '0');
+  return `${parsed.getFullYear()}-${pad(parsed.getMonth()+1)}-${pad(parsed.getDate())} ${pad(parsed.getHours())}:${pad(parsed.getMinutes())}:${pad(parsed.getSeconds())}`;
 }
 
 // Get task statistics for the logged-in user (Dashboard)

@@ -116,9 +116,6 @@ function TodoBoard({ token, handleLogout }) {
   const [editDescription, setEditDescription] = useState('');
   const [editPriority, setEditPriority] = useState('Medium');
   const [editDeadline, setEditDeadline] = useState('');
-  // editIndex kept for backward compat in saveEdit
-  const [editIndex, setEditIndex] = useState(null);
-
   // View & Filter states
   const [viewMode, setViewMode] = useState('board');
   const [listFilter, setListFilter] = useState('all');
@@ -288,7 +285,7 @@ function TodoBoard({ token, handleLogout }) {
       if (response.ok) {
         setTasks(prev => prev.filter(t => t.id !== taskId));
         // Clear edit mode if the deleted task was being edited
-        if (editTaskId === taskId) { setEditTaskId(null); setEditIndex(null); }
+        if (editTaskId === taskId) { setEditTaskId(null); }
       }
     } catch (error) {
       console.error('Delete error', error);
@@ -296,8 +293,6 @@ function TodoBoard({ token, handleLogout }) {
   };
 
   const startEditing = (task) => {
-    const idx = tasks.findIndex(t => t.id === task.id);
-    setEditIndex(idx);
     setEditTaskId(task.id);
     setEditText(task.text);
     setEditDescription(task.description || '');
@@ -335,7 +330,6 @@ function TodoBoard({ token, handleLogout }) {
             : t
         ));
         setEditTaskId(null);
-        setEditIndex(null);
       }
     } catch (error) {
       console.error('Edit error', error);
