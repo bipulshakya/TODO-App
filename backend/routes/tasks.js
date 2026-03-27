@@ -4,7 +4,9 @@ const db = require('../db');
 
 // Helper: normalize deadline — empty string or falsy → null
 function normalizeDeadline(val) {
-  if (!val || val === '') return null;
+  if (!val || val.trim() === '') return null;
+  // If date string is invalid (e.g., user typed incomplete date), force null to prevent SQL crash
+  if (isNaN(new Date(val).getTime())) return null;
   return val;
 }
 
