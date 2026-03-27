@@ -369,7 +369,7 @@ function TodoBoard({ token, handleLogout }) {
     const isEditing = editTaskId === task.id;
     const dlStatus = getDeadlineStatus(task.deadline);
     return (
-      <li key={task.id} draggable onDragStart={() => handleDragStart(task.id)}
+      <li key={task.id} draggable={viewMode === 'board'} onDragStart={() => handleDragStart(task.id)}
         className={`draggable-task ${!task.completed && dlStatus === 'overdue' ? 'task-overdue' : ''} ${!task.completed && dlStatus === 'soon' ? 'task-due-soon' : ''}`}
       >
         {isEditing ? (
