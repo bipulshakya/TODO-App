@@ -59,16 +59,20 @@ function TodoBoard({ token, handleLogout }) {
   const [newPriority, setNewPriority] = useState('Medium');
   const [newDeadline, setNewDeadline] = useState('');
 
-  const [editIndex, setEditIndex] = useState(null);
   const [editText, setEditText] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [editPriority, setEditPriority] = useState('Medium');
   const [editDeadline, setEditDeadline] = useState('');
+  // editIndex kept for backward compat in saveEdit
+  const [editIndex, setEditIndex] = useState(null);
 
   // View & Filter states
   const [viewMode, setViewMode] = useState('board');
   const [listFilter, setListFilter] = useState('all');
   const [sortByDeadline, setSortByDeadline] = useState(false);
+
+  // editTaskId tracks which task is being edited (by id, not array index)
+  const [editTaskId, setEditTaskId] = useState(null);
 
   // Google Calendar state
   const [gcalStatus, setGcalStatus] = useState({ configured: false, connected: false });
@@ -175,10 +179,26 @@ function TodoBoard({ token, handleLogout }) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addTask(); }
   };
 
-  const toggleTask = async (index, taskId) => {
-    const task = tasks[index];
-    const newInProgress = (!task.inProgress && !task.in_progress && !task.completed) ? true : false;
-    const newCompleted = (task.inProgress || task.in_progress) && !task.completed ? true : false;
+  // ── Toggle task state: TODO → InProgress → Completed → TODO (3-state cycle)
+  const toggleTask = async (taskId) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const isInProgress = Boolean(task.in_progress) || Boolean(task.inProgress);
+    const isCompleted = Boolean(task.completed);
+
+    // Cycle: todo → in_progress → completed → todo
+    let newInProgress, newCompleted;
+    if (!isInProgress && !isCompleted) {
+      // todo → in_progress
+      newInProgress = true; newCompleted = false;
+    } else if (isInProgress && !isCompleted) {
+      // in_progress → completed
+      newInProgress = false; newCompleted = true;
+    } else {
+      // completed → todo (reset)
+      newInProgress = false; newCompleted = false;
+    }
 
     try {
       const response = await fetch(`${API_URL}/tasks/${taskId}`, {
@@ -186,8 +206,8 @@ function TodoBoard({ token, handleLogout }) {
         headers: authHeaders(),
         body: JSON.stringify({
           text: task.text,
-          description: task.description,
-          priority: task.priority,
+          description: task.description || null,
+          priority: task.priority || 'Medium',
           deadline: task.deadline || null,
           in_progress: newInProgress,
           completed: newCompleted
@@ -195,36 +215,40 @@ function TodoBoard({ token, handleLogout }) {
       });
 
       if (response.ok) {
-        setTasks(prev => prev.map((t, i) => {
-          if (i !== index) return t;
-          return { ...t, inProgress: newInProgress, in_progress: newInProgress, completed: newCompleted };
-        }));
+        setTasks(prev => prev.map(t =>
+          t.id === taskId
+            ? { ...t, inProgress: newInProgress, in_progress: newInProgress, completed: newCompleted }
+            : t
+        ));
       }
     } catch (error) {
       console.error('Toggle error', error);
     }
   };
 
-  const deleteTask = async (index, taskId) => {
+  const deleteTask = async (taskId) => {
     try {
       const response = await fetch(`${API_URL}/tasks/${taskId}`, {
         method: 'DELETE',
         headers: authHeaders()
       });
       if (response.ok) {
-        setTasks(prev => prev.filter((_, i) => i !== index));
+        setTasks(prev => prev.filter(t => t.id !== taskId));
+        // Clear edit mode if the deleted task was being edited
+        if (editTaskId === taskId) { setEditTaskId(null); setEditIndex(null); }
       }
     } catch (error) {
       console.error('Delete error', error);
     }
   };
 
-  const startEditing = (index, task) => {
-    setEditIndex(index);
+  const startEditing = (task) => {
+    const idx = tasks.findIndex(t => t.id === task.id);
+    setEditIndex(idx);
+    setEditTaskId(task.id);
     setEditText(task.text);
     setEditDescription(task.description || '');
     setEditPriority(task.priority || 'Medium');
-    // Format deadline for datetime-local input
     if (task.deadline) {
       const d = new Date(task.deadline);
       const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
@@ -236,26 +260,28 @@ function TodoBoard({ token, handleLogout }) {
 
   const saveEdit = async (taskId) => {
     if (editText.trim() === '') return;
-    const task = tasks[editIndex];
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
     try {
       const response = await fetch(`${API_URL}/tasks/${taskId}`, {
         method: 'PUT',
         headers: authHeaders(),
         body: JSON.stringify({
-          text: editText,
-          description: editDescription,
+          text: editText.trim(),
+          description: editDescription || null,
           priority: editPriority,
           deadline: editDeadline || null,
-          in_progress: task.inProgress || task.in_progress,
-          completed: task.completed
+          in_progress: Boolean(task.in_progress) || Boolean(task.inProgress),
+          completed: Boolean(task.completed)
         })
       });
       if (response.ok) {
-        setTasks(prev => prev.map((t, i) =>
-          i === editIndex
-            ? { ...t, text: editText, description: editDescription, priority: editPriority, deadline: editDeadline || null }
+        setTasks(prev => prev.map(t =>
+          t.id === taskId
+            ? { ...t, text: editText.trim(), description: editDescription || null, priority: editPriority, deadline: editDeadline || null }
             : t
         ));
+        setEditTaskId(null);
         setEditIndex(null);
       }
     } catch (error) {
@@ -291,7 +317,15 @@ function TodoBoard({ token, handleLogout }) {
     try {
       const response = await fetch(`${API_URL}/tasks/${task.id}`, {
         method: 'PUT', headers: authHeaders(),
-        body: JSON.stringify({ ...task, in_progress: newInProgress, completed: newCompleted })
+        // Fix: send explicit fields, not the raw task object (which has MySQL tinyint 0/1)
+        body: JSON.stringify({
+          text: task.text,
+          description: task.description || null,
+          priority: task.priority || 'Medium',
+          deadline: task.deadline || null,
+          in_progress: newInProgress,
+          completed: newCompleted
+        })
       });
       if (response.ok) {
         setTasks(prev => prev.map((t, i) =>
@@ -331,13 +365,14 @@ function TodoBoard({ token, handleLogout }) {
   };
 
   const renderTask = (task) => {
-    const idx = tasks.indexOf(task);
+    const isEditing = editTaskId === task.id;
+    const idx = tasks.findIndex(t => t.id === task.id);
     const dlStatus = getDeadlineStatus(task.deadline);
     return (
       <li key={task.id} draggable onDragStart={() => handleDragStart(idx)}
         className={`draggable-task ${!task.completed && dlStatus === 'overdue' ? 'task-overdue' : ''} ${!task.completed && dlStatus === 'soon' ? 'task-due-soon' : ''}`}
       >
-        {editIndex === idx ? (
+        {isEditing ? (
           <div className="edit-section">
             <input type="text" value={editText} onChange={(e) => setEditText(e.target.value)} placeholder="Task label" />
             <textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Description" rows="2" />
@@ -356,7 +391,7 @@ function TodoBoard({ token, handleLogout }) {
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button className="btn-primary" onClick={() => saveEdit(task.id)}>Save Changes</button>
-              <button className="control-btn" onClick={() => setEditIndex(null)}>Cancel</button>
+              <button className="control-btn" onClick={() => { setEditTaskId(null); setEditIndex(null); }}>Cancel</button>
             </div>
           </div>
         ) : (
@@ -365,7 +400,7 @@ function TodoBoard({ token, handleLogout }) {
 
             <div className="task-item-header">
               <label className="task-checkbox-container">
-                <input type="checkbox" checked={task.completed} onChange={() => toggleTask(idx, task.id)} />
+                <input type="checkbox" checked={Boolean(task.completed)} onChange={() => toggleTask(task.id)} />
                 <div className="custom-checkbox"></div>
               </label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -383,8 +418,8 @@ function TodoBoard({ token, handleLogout }) {
                 ⏱ {formatTimestamp(task.created_at)}
               </span>
               <div className="task-actions">
-                <button className="btn-icon" onClick={() => startEditing(idx, task)} title="Edit">✎</button>
-                <button className="btn-icon delete" onClick={() => deleteTask(idx, task.id)} title="Delete">✕</button>
+                <button className="btn-icon" onClick={() => startEditing(task)} title="Edit">✎</button>
+                <button className="btn-icon delete" onClick={() => deleteTask(task.id)} title="Delete">✕</button>
               </div>
             </div>
           </div>

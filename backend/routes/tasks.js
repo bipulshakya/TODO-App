@@ -2,6 +2,12 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+// Helper: normalize deadline — empty string or falsy → null
+function normalizeDeadline(val) {
+  if (!val || val === '') return null;
+  return val;
+}
+
 // Get task statistics for the logged-in user (Dashboard)
 router.get('/stats', async (req, res) => {
   try {
@@ -13,7 +19,6 @@ router.get('/stats', async (req, res) => {
       FROM tasks WHERE user_id = ?`,
       [req.userId]
     );
-    
     const stats = rows[0];
     res.json({
       total: Number(stats.total || 0),
@@ -58,21 +63,26 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   const { text, description, priority, deadline } = req.body;
   const taskPriority = priority || 'Medium';
-  const taskDeadline = deadline || null;
+  const taskDeadline = normalizeDeadline(deadline);
+
+  if (!text || text.trim() === '') {
+    return res.status(400).json({ error: 'Task text is required' });
+  }
 
   try {
     const [result] = await db.query(
       'INSERT INTO tasks (text, description, priority, deadline, user_id) VALUES (?, ?, ?, ?, ?)',
-      [text, description, taskPriority, taskDeadline, req.userId]
+      [text.trim(), description || null, taskPriority, taskDeadline, req.userId]
     );
     res.json({
       id: result.insertId,
-      text,
-      description,
+      text: text.trim(),
+      description: description || null,
       priority: taskPriority,
       deadline: taskDeadline,
       completed: false,
-      in_progress: false
+      in_progress: false,
+      created_at: new Date().toISOString()
     });
   } catch (error) {
     console.error('Add task error:', error);
@@ -85,7 +95,11 @@ router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { text, description, completed, in_progress, priority, deadline } = req.body;
   const taskPriority = priority || 'Medium';
-  const taskDeadline = deadline !== undefined ? deadline : null;
+  // Fix: treat empty string as null for deadline
+  const taskDeadline = normalizeDeadline(deadline);
+  // Fix: ensure booleans are proper booleans (MySQL tinyint comes back as 1/0)
+  const isCompleted = completed === true || completed === 1 || completed === '1';
+  const isInProgress = in_progress === true || in_progress === 1 || in_progress === '1';
 
   try {
     // Check previous state to detect completion transition
@@ -99,20 +113,19 @@ router.put('/:id', async (req, res) => {
     }
 
     const prevTask = existing[0];
-    const wasCompleted = Boolean(prevTask.completed);
-    const nowCompleted = Boolean(completed);
+    const wasCompleted = Number(prevTask.completed) === 1;
 
     await db.query(
       'UPDATE tasks SET text = ?, description = ?, priority = ?, deadline = ?, completed = ?, in_progress = ? WHERE id = ? AND user_id = ?',
-      [text, description, taskPriority, taskDeadline, completed, in_progress, id, req.userId]
+      [text, description || null, taskPriority, taskDeadline, isCompleted ? 1 : 0, isInProgress ? 1 : 0, id, req.userId]
     );
 
     // Log to history if task just became completed
-    if (!wasCompleted && nowCompleted) {
+    if (!wasCompleted && isCompleted) {
       await db.query(
         `INSERT INTO task_history (user_id, task_text, description, priority, deadline, action)
          VALUES (?, ?, ?, ?, ?, 'completed')`,
-        [req.userId, text, description, taskPriority, taskDeadline]
+        [req.userId, text, description || null, taskPriority, taskDeadline]
       );
     }
 
@@ -127,7 +140,6 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    // Fetch task before deleting to log it
     const [existing] = await db.query(
       'SELECT text, description, priority, deadline FROM tasks WHERE id = ? AND user_id = ?',
       [id, req.userId]
@@ -139,11 +151,11 @@ router.delete('/:id', async (req, res) => {
 
     const task = existing[0];
 
-    // Log to history
+    // Log to history before deleting
     await db.query(
       `INSERT INTO task_history (user_id, task_text, description, priority, deadline, action)
        VALUES (?, ?, ?, ?, ?, 'deleted')`,
-      [req.userId, task.text, task.description, task.priority, task.deadline]
+      [req.userId, task.text, task.description || null, task.priority, task.deadline || null]
     );
 
     await db.query('DELETE FROM tasks WHERE id = ? AND user_id = ?', [id, req.userId]);
