@@ -7,6 +7,7 @@ import Dashboard from './components/Dashboard';
 import AdminPanel from './components/AdminPanel';
 import CalendarView from './components/CalendarView';
 import TaskHistory from './components/TaskHistory';
+import ToastManager from './components/ToastManager';
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem('auth_token') || null);
@@ -116,6 +117,7 @@ function App() {
       </div>
 
       {renderView()}
+      <ToastManager />
     </div>
   );
 }

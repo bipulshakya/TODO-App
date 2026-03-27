@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import API_URL from '../config';
 import './TodoBoard.css';
+import { showToast } from './ToastManager';
+import { requestNotificationPermission, sendBrowserNotification, checkAndMarkNotified } from '../utils/NotificationUtils';
 
 const COLUMN = { TODO: 'todo', IN_PROGRESS: 'inProgress', COMPLETED: 'completed' };
 
@@ -54,6 +56,57 @@ function TodoBoard({ token, handleLogout }) {
   const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   const [tasks, setTasks] = useState([]);
+
+  // Use ref to access latest tasks without stale closures in interval
+  const tasksRef = useRef(tasks);
+  useEffect(() => { tasksRef.current = tasks; }, [tasks]);
+
+  // Request browser push notification permissions on load
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
+
+  // Deadline Polling Check (Every 60s)
+  useEffect(() => {
+    const checkDeadlines = () => {
+      // Loop through the most up-to-date tasks
+      tasksRef.current.forEach(task => {
+        if (!task.deadline || task.completed) return;
+        
+        const dl = new Date(task.deadline).getTime();
+        const current = new Date().getTime();
+        const diffMs = dl - current;
+        if (diffMs <= 0) return; // Overdue already
+
+        const diffHours = diffMs / (1000 * 60 * 60);
+
+        // 1 Hour Alert (if within the last hour before deadline)
+        if (diffHours <= 1.0 && diffHours > 0) {
+          if (!checkAndMarkNotified(task.id, '1h')) {
+            showToast(`Task Due Soon: ${task.text}`, "Deadline is in less than 1 hour!", "error");
+            sendBrowserNotification("Task Due in 1 Hour", { body: task.text });
+          }
+        } 
+        // 24 Hour Alert (within the 24th hour block)
+        else if (diffHours <= 24.0 && diffHours > 23.0) {
+          if (!checkAndMarkNotified(task.id, '24h')) {
+            showToast(`Task Deadline: ${task.text}`, "Due in 24 hours.", "warning");
+            sendBrowserNotification("Task Due in 24 Hours", { body: task.text });
+          }
+        }
+      });
+    };
+
+    // Run once after 2 seconds to allow tasks to load, then every 60s
+    const initialTimer = setTimeout(checkDeadlines, 2000);
+    const intervalTimer = setInterval(checkDeadlines, 60000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(intervalTimer);
+    };
+  }, []);
+
   const [newTask, setNewTask] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newPriority, setNewPriority] = useState('Medium');
