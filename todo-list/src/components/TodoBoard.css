@@ -470,3 +470,150 @@
   }
   .task-box { width: 100%; margin-bottom: 20px; min-height: auto; }
 }
+
+/* ── Deadline Badges ─────────────────────────────────────────────── */
+.deadline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin: 6px 0 6px 32px;
+  letter-spacing: 0.3px;
+  width: fit-content;
+}
+
+.deadline-overdue {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  animation: pulse-overdue 2s ease-in-out infinite;
+}
+
+@keyframes pulse-overdue {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
+  50% { box-shadow: 0 0 0 5px rgba(239, 68, 68, 0); }
+}
+
+.deadline-soon {
+  background: rgba(251, 146, 60, 0.15);
+  color: #fdba74;
+  border: 1px solid rgba(251, 146, 60, 0.35);
+}
+
+.deadline-future {
+  background: rgba(99, 102, 241, 0.12);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+/* ── Task Card Urgency Highlights ────────────────────────────────── */
+.task-overdue .task-item {
+  border-left: 3px solid rgba(239, 68, 68, 0.6);
+  background: rgba(239, 68, 68, 0.04);
+}
+
+.task-due-soon .task-item {
+  border-left: 3px solid rgba(251, 146, 60, 0.6);
+  background: rgba(251, 146, 60, 0.03);
+}
+
+/* ── Deadline Input ───────────────────────────────────────────────── */
+.deadline-input {
+  flex: 1;
+  padding: 10px 12px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: var(--font-body);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  color-scheme: dark;
+  min-width: 170px;
+}
+
+.deadline-input:focus {
+  outline: none;
+  border-color: var(--accent-indigo);
+  box-shadow: 0 0 0 2px var(--accent-indigo-glow);
+}
+
+/* ── Edit Row (priority + deadline side by side) ─────────────────── */
+.edit-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ── Google Calendar Bar ──────────────────────────────────────────── */
+.gcal-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: rgba(15, 20, 31, 0.5);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 12px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.gcal-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.btn-gcal-connect {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #4285f4, #34a853);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 10px rgba(66, 133, 244, 0.3);
+}
+
+.btn-gcal-connect:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(66, 133, 244, 0.4);
+}
+
+.btn-gcal-sync {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, var(--accent-indigo), var(--accent-teal));
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 10px var(--accent-indigo-glow);
+}
+
+.btn-gcal-sync:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px var(--accent-indigo-glow);
+}
+
+.btn-gcal-sync:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.gcal-msg {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+

@@ -5,6 +5,7 @@ const db = require('./db');
 const taskRoutes = require('./routes/tasks');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const googleCalendarRoutes = require('./routes/googleCalendar');
 const { authMiddleware, adminAuthMiddleware } = require('./middleware/auth');
 
 const app = express();
@@ -19,6 +20,9 @@ app.use('/tasks', authMiddleware, taskRoutes);
 
 // Protected admin routes (require Admin JWT)
 app.use('/admin', authMiddleware, adminAuthMiddleware, adminRoutes);
+
+// Google Calendar routes (OAuth is public; sync is protected)
+app.use('/calendar', googleCalendarRoutes);
 
 require('dotenv').config();
 const PORT = process.env.PORT || 5001;
@@ -65,6 +69,43 @@ async function initDB() {
       await db.query(`ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT FALSE`);
       console.log('✅ Added is_admin column to users table');
     }
+
+    // Add deadline column to tasks if it doesn't already exist
+    const [deadlineColumns] = await db.query(`
+      SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tasks' AND COLUMN_NAME = 'deadline'
+    `);
+    if (deadlineColumns.length === 0) {
+      await db.query(`ALTER TABLE tasks ADD COLUMN deadline DATETIME NULL`);
+      console.log('✅ Added deadline column to tasks table');
+    }
+
+    // Create task_history table
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS task_history (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        task_text VARCHAR(500) NOT NULL,
+        description TEXT,
+        priority VARCHAR(20) DEFAULT 'Medium',
+        deadline DATETIME NULL,
+        action ENUM('completed', 'deleted') NOT NULL,
+        action_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      )
+    `);
+
+    // Create google_tokens table
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS google_tokens (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL UNIQUE,
+        access_token TEXT,
+        refresh_token TEXT,
+        expiry_date BIGINT,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      )
+    `);
 
     console.log('✅ Database tables ready');
   } catch (err) {

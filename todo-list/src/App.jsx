@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import AuthForm from './components/AuthForm';
@@ -6,14 +6,28 @@ import TodoBoard from './components/TodoBoard';
 import Dashboard from './components/Dashboard';
 import AdminPanel from './components/AdminPanel';
 import CalendarView from './components/CalendarView';
+import TaskHistory from './components/TaskHistory';
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem('auth_token') || null);
   const [username, setUsername] = useState(() => localStorage.getItem('auth_username') || '');
   const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('auth_is_admin') === 'true');
   
-  // 'board', 'dashboard', 'admin', 'calendar'
+  // 'board', 'dashboard', 'admin', 'calendar', 'history'
   const [currentView, setCurrentView] = useState('board');
+
+  // Theme: 'dark' (default) or 'light'
+  const [theme, setTheme] = useState(() => localStorage.getItem('app_theme') || 'dark');
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    localStorage.setItem('app_theme', next);
+  };
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   const handleAuthSuccess = (newToken, newUsername, newIsAdmin) => {
     setToken(newToken);
@@ -40,12 +54,13 @@ function App() {
   const renderView = () => {
     if (currentView === 'dashboard') return <Dashboard token={token} handleLogout={handleLogout} />;
     if (currentView === 'calendar') return <CalendarView token={token} handleLogout={handleLogout} />;
+    if (currentView === 'history') return <TaskHistory token={token} handleLogout={handleLogout} />;
     if (currentView === 'admin' && isAdmin) return <AdminPanel token={token} handleLogout={handleLogout} username={username} />;
     return <TodoBoard token={token} handleLogout={handleLogout} />;
   };
 
   return (
-    <div className="App">
+    <div className="App" data-theme={theme}>
       {/* Dynamic Navbar with Tabs */}
       <div className="app-navbar">
         <div className="app-navbar-left">
@@ -69,6 +84,12 @@ function App() {
             >
               Calendar
             </button>
+            <button 
+              className={`nav-tab ${currentView === 'history' ? 'active' : ''}`}
+              onClick={() => setCurrentView('history')}
+            >
+              History
+            </button>
             {isAdmin && (
               <button 
                 className={`nav-tab ${currentView === 'admin' ? 'active' : ''} admin-tab`}
@@ -82,6 +103,14 @@ function App() {
 
         <div className="app-navbar-user">
           <span className="app-navbar-greeting">👤 {username}</span>
+          <button
+            className="theme-toggle-btn"
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
           <button className="app-logout-btn" onClick={handleLogout}>Logout</button>
         </div>
       </div>
