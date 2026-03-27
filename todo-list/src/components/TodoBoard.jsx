@@ -290,21 +290,22 @@ function TodoBoard({ token, handleLogout }) {
   };
 
   // ── Drag-and-Drop ──────────────────────────────────────────
-  const dragIndex = useRef(null);
+  const dragTaskId = useRef(null);
   const [dragOverCol, setDragOverCol] = useState(null);
 
-  const handleDragStart = (index) => { dragIndex.current = index; };
+  const handleDragStart = (taskId) => { dragTaskId.current = taskId; };
   const handleDragOver = (e, col) => { e.preventDefault(); setDragOverCol(col); };
   const handleDragLeave = () => setDragOverCol(null);
 
   const handleDrop = async (e, targetCol) => {
     e.preventDefault();
     setDragOverCol(null);
-    if (dragIndex.current === null) return;
-    const idx = dragIndex.current;
-    dragIndex.current = null;
+    if (!dragTaskId.current) return;
+    const taskId = dragTaskId.current;
+    dragTaskId.current = null;
 
-    const task = tasks[idx];
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
     let newInProgress = false; let newCompleted = false;
 
     switch (targetCol) {
@@ -328,8 +329,8 @@ function TodoBoard({ token, handleLogout }) {
         })
       });
       if (response.ok) {
-        setTasks(prev => prev.map((t, i) =>
-          i === idx ? { ...t, inProgress: newInProgress, in_progress: newInProgress, completed: newCompleted } : t
+        setTasks(prev => prev.map(t =>
+          t.id === taskId ? { ...t, inProgress: newInProgress, in_progress: newInProgress, completed: newCompleted } : t
         ));
       }
     } catch (error) { console.error('Drop error', error); }
@@ -366,10 +367,9 @@ function TodoBoard({ token, handleLogout }) {
 
   const renderTask = (task) => {
     const isEditing = editTaskId === task.id;
-    const idx = tasks.findIndex(t => t.id === task.id);
     const dlStatus = getDeadlineStatus(task.deadline);
     return (
-      <li key={task.id} draggable onDragStart={() => handleDragStart(idx)}
+      <li key={task.id} draggable onDragStart={() => handleDragStart(task.id)}
         className={`draggable-task ${!task.completed && dlStatus === 'overdue' ? 'task-overdue' : ''} ${!task.completed && dlStatus === 'soon' ? 'task-due-soon' : ''}`}
       >
         {isEditing ? (
