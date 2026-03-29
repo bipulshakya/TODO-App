@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, JWT_SECRET } = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../middleware/auth');
 
 // Only initialize Google OAuth if credentials are provided
 let oauth2Client = null;
-let calendar = null;
 
 try {
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
@@ -17,7 +15,6 @@ try {
       process.env.GOOGLE_CLIENT_SECRET,
       process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5001/calendar/oauth2callback'
     );
-    calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     console.log('✅ Google Calendar OAuth2 client initialized');
   } else {
     console.log('ℹ️  Google Calendar credentials not set — Calendar sync disabled');
@@ -46,13 +43,12 @@ router.get('/status', authMiddleware, async (req, res) => {
 });
 
 // GET /calendar/auth — redirect user to Google OAuth consent screen
-// Note: This route is a browser redirect, JWT is passed in query param
+// This is a browser redirect, so JWT is passed as a query param (not header)
 router.get('/auth', (req, res) => {
   if (!oauth2Client) {
     return res.status(503).json({ error: 'Google Calendar is not configured on this server.' });
   }
 
-  // Decode userId from JWT query param (since this is a browser redirect)
   const token = req.query.token;
   if (!token) return res.status(401).send('Missing auth token.');
 
@@ -104,7 +100,6 @@ router.get('/oauth2callback', async (req, res) => {
       [userId, tokens.access_token, tokens.refresh_token || null, tokens.expiry_date || null]
     );
 
-    // Close popup and notify parent window
     res.send(`
       <html>
         <body>
@@ -155,7 +150,6 @@ router.post('/sync', authMiddleware, async (req, res) => {
       }
     });
 
-    // Get tasks with deadlines that are not yet completed
     const [tasks] = await db.query(
       `SELECT id, text, description, deadline, priority FROM tasks
        WHERE user_id = ? AND deadline IS NOT NULL AND completed = 0`,
@@ -172,7 +166,7 @@ router.post('/sync', authMiddleware, async (req, res) => {
     let synced = 0;
     for (const task of tasks) {
       const deadlineDate = new Date(task.deadline);
-      const startTime = new Date(deadlineDate.getTime() - 60 * 60 * 1000); // 1 hour before deadline
+      const startTime = new Date(deadlineDate.getTime() - 60 * 60 * 1000);
 
       const event = {
         summary: `[TODO] ${task.text}`,
