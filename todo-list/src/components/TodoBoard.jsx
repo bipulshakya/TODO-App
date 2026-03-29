@@ -79,10 +79,12 @@ function TodoBoard({ token, handleLogout }) {
         if (diffMs <= 0) return; // Overdue already
 
         const diffHours = diffMs / (1000 * 60 * 60);
-
+        console.log(`[DeadlineCheck] Task ${task.id} ("${task.text}") - DiffHours: ${diffHours.toFixed(3)}`);
+        
         // 1 Hour Alert (if within the last hour before deadline)
         if (diffHours <= 1.0 && diffHours > 0) {
           if (!checkAndMarkNotified(task.id, '1h')) {
+            console.log(`[Alert] Triggering 1h for ${task.id}`);
             showToast(`Task Due Soon: ${task.text}`, "Deadline is in less than 1 hour!", "error");
             sendBrowserNotification("Task Due in 1 Hour", { body: task.text });
           }
@@ -90,6 +92,7 @@ function TodoBoard({ token, handleLogout }) {
         // 24 Hour Alert (within the 24th hour block)
         else if (diffHours <= 24.0 && diffHours > 23.0) {
           if (!checkAndMarkNotified(task.id, '24h')) {
+            console.log(`[Alert] Triggering 24h for ${task.id}`);
             showToast(`Task Deadline: ${task.text}`, "Due in 24 hours.", "warning");
             sendBrowserNotification("Task Due in 24 Hours", { body: task.text });
           }
@@ -299,8 +302,12 @@ function TodoBoard({ token, handleLogout }) {
     setEditPriority(task.priority || 'Medium');
     if (task.deadline) {
       const d = new Date(task.deadline);
-      const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-      setEditDeadline(local.toISOString().slice(0, 16));
+      if (!isNaN(d.getTime())) {
+        const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+        setEditDeadline(local.toISOString().slice(0, 16));
+      } else {
+        setEditDeadline('');
+      }
     } else {
       setEditDeadline('');
     }
@@ -438,7 +445,7 @@ function TodoBoard({ token, handleLogout }) {
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button className="btn-primary" onClick={() => saveEdit(task.id)}>Save Changes</button>
-              <button className="control-btn" onClick={() => { setEditTaskId(null); setEditIndex(null); }}>Cancel</button>
+              <button className="control-btn" onClick={() => { setEditTaskId(null); }}>Cancel</button>
             </div>
           </div>
         ) : (
