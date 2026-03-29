@@ -272,3 +272,106 @@ button {
 [data-theme="light"] .App::before {
   opacity: 0.015;
 }
+
+/* ── Responsive Layout ─────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .app-navbar {
+    padding: 14px 18px;
+  }
+
+  .app-navbar-left {
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .app-navbar-tabs {
+    gap: 8px;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+
+  .app-navbar-tabs::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .app-navbar-tabs::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 999px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-navbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .app-navbar-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .app-navbar-logo {
+    font-size: 20px;
+  }
+
+  .app-navbar-tabs {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .app-navbar-user {
+    justify-content: space-between;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .app-navbar-greeting {
+    font-size: 13px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .theme-toggle-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .app-logout-btn {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .app-navbar {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .nav-tab {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  .app-navbar-user {
+    flex-wrap: wrap;
+  }
+}

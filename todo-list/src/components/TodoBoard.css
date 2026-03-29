@@ -465,10 +465,128 @@
 }
 
 @media (max-width: 768px) {
+  .todo-container {
+    margin: 18px auto;
+    padding: 0 10px;
+  }
+
+  .todo-header-area {
+    align-items: stretch;
+    margin-bottom: 18px;
+    gap: 14px;
+  }
+
+  .todo-header-area h1 {
+    font-size: 28px;
+  }
+
+  .board-controls {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .filter-group,
+  .view-group {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .control-btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .input-section {
+    padding: 14px;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .input-section > input,
+  .input-section > textarea,
+  .input-section > select,
+  .input-section > button {
+    width: 100% !important;
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  .btn-primary {
+    width: 100%;
+  }
+
+  .task-item {
+    padding: 14px;
+  }
+
+  .task-item-header {
+    padding-right: 0;
+  }
+
+  .drag-handle {
+    display: none;
+  }
+
+  .task-desc {
+    margin-left: 0;
+  }
+
+  .deadline-badge {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+
+  .task-meta {
+    margin-left: 0;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .task-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .gcal-bar {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .btn-gcal-connect,
+  .btn-gcal-sync {
+    width: 100%;
+  }
+
   .task-box-container {
     flex-direction: column;
   }
   .task-box { width: 100%; margin-bottom: 20px; min-height: auto; }
+}
+
+@media (max-width: 420px) {
+  .todo-container {
+    padding: 0 8px;
+  }
+
+  .todo-header-area h1 {
+    font-size: 24px;
+  }
+
+  .control-btn {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  .task-title {
+    font-size: 14px;
+  }
+
+  .task-desc {
+    font-size: 13px;
+  }
 }
 
 /* ── Deadline Badges ─────────────────────────────────────────────── */
