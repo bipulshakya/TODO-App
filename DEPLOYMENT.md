@@ -30,7 +30,7 @@ Option A: Blueprint deploy (recommended)
 2. Confirm service `todo-backend`.
 3. Set required env vars:
    - `JWT_SECRET`
-   - Database vars: either `DATABASE_URL` or `DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME`
+   - Database vars: either `DATABASE_URL` (or `MYSQL_URL` / `MYSQL_PRIVATE_URL`) or `DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME`
    - (Optional) Google Calendar vars:
      - `GOOGLE_CLIENT_ID`
      - `GOOGLE_CLIENT_SECRET`
@@ -50,7 +50,7 @@ This repo includes `railway.json`.
 2. Railway will use start command `node backend/server.js`.
 3. Add env vars:
    - `JWT_SECRET`
-   - Database vars: either `DATABASE_URL` or `DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME`
+   - Database vars: either `DATABASE_URL` (or `MYSQL_URL` / `MYSQL_PRIVATE_URL`) or `DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME`
    - (Optional) Google Calendar vars as above
 4. Deploy.
 
@@ -61,7 +61,7 @@ This repo includes `railway.json`.
    - host, port, database, username, password
 3. Set these in Render/Railway env vars:
    - `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
-   - or use one `DATABASE_URL`
+   - or use one `DATABASE_URL` / `MYSQL_URL` / `MYSQL_PRIVATE_URL`
 
 The backend already uses SSL mode in `backend/db.js`, which works for managed MySQL providers like Aiven.
 

@@ -2,10 +2,11 @@ const mysql = require('mysql2');
 require('dotenv').config();
 
 const defaultSsl = { rejectUnauthorized: false };
+const dbUrl = process.env.DATABASE_URL || process.env.MYSQL_URL || process.env.MYSQL_PRIVATE_URL;
 
 function getDbConfig() {
-    if (process.env.DATABASE_URL) {
-        const parsed = new URL(process.env.DATABASE_URL);
+    if (dbUrl) {
+        const parsed = new URL(dbUrl);
         return {
             host: parsed.hostname,
             user: decodeURIComponent(parsed.username || ''),
