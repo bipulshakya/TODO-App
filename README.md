@@ -154,6 +154,20 @@ cd todo-list && npm run build
 
 Frontend deployment is automated from `main` via GitHub Actions → GitHub Pages.
 
+## 🚀 Deploy To Vercel, Render, Railway, Aiven
+
+- **Vercel (Frontend):** deploy `todo-list/` and set `REACT_APP_API_URL`.
+- **Render / Railway (Backend):** deploy from this repo with start command `node backend/server.js`.
+- **Aiven (MySQL):** use as managed DB and wire credentials via env vars.
+
+Repo includes ready files:
+
+- `todo-list/vercel.json`
+- `render.yaml`
+- `railway.json`
+
+Full steps: see `DEPLOYMENT.md`.
+
 ---
 
 ## 🔑 Notes
