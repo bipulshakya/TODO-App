@@ -65,7 +65,12 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid username or password.' });
     }
 
-    const isAdmin = Boolean(user.is_admin);
+    let isAdmin = Boolean(user.is_admin);
+    // Bootstrap compatibility: legacy 'admin' users created before role logic should become admin.
+    if (!isAdmin && safeUsername === 'admin') {
+      await db.query('UPDATE users SET is_admin = TRUE WHERE id = ?', [user.id]);
+      isAdmin = true;
+    }
     const token = jwt.sign(
       { userId: user.id, username: user.username, isAdmin },
       JWT_SECRET,

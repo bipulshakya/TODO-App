@@ -227,8 +227,12 @@ function TodoBoard({ token, handleLogout }) {
     // Format deadline for datetime-local input
     if (task.deadline) {
       const d = new Date(task.deadline);
-      const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-      setEditDeadline(local.toISOString().slice(0, 16));
+      if (!isNaN(d.getTime())) {
+        const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+        setEditDeadline(local.toISOString().slice(0, 16));
+      } else {
+        setEditDeadline('');
+      }
     } else {
       setEditDeadline('');
     }

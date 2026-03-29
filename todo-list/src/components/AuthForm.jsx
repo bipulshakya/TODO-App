@@ -38,10 +38,11 @@ function AuthForm({ onAuthSuccess }) {
         return;
       }
 
-      // Store token and call parent
+      // Store auth data and notify parent (including admin role)
       localStorage.setItem('auth_token', data.token);
       localStorage.setItem('auth_username', data.username);
-      onAuthSuccess(data.token, data.username);
+      localStorage.setItem('auth_is_admin', String(Boolean(data.isAdmin)));
+      onAuthSuccess(data.token, data.username, Boolean(data.isAdmin));
     } catch (err) {
       setError('Could not reach the server. Please try again.');
     } finally {
