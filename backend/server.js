@@ -40,6 +40,22 @@ async function initDB() {
       )
     `);
 
+    // Create tasks table for fresh databases before any ALTER checks
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS tasks (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        text VARCHAR(500) NOT NULL,
+        description TEXT,
+        priority VARCHAR(20) DEFAULT 'Medium',
+        deadline DATETIME NULL,
+        completed BOOLEAN DEFAULT FALSE,
+        in_progress BOOLEAN DEFAULT FALSE,
+        user_id INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      )
+    `);
+
     // Add user_id column to tasks if it doesn't already exist
     const [columns] = await db.query(`
       SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS

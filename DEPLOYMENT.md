@@ -80,3 +80,18 @@ Redeploy Vercel frontend after changing env vars.
 3. Task CRUD works.
 4. Admin account can access Admin Panel.
 5. If using Google Calendar, OAuth callback URL matches deployed backend domain.
+
+## 7) Troubleshooting: Aiven "Access denied"
+
+If backend logs show:
+
+- `Access denied for user 'avnadmin'@'...' (using password: YES)`
+
+Check these items:
+
+1. Verify credentials in Aiven are correct (username/password/database/host/port).
+2. If you use a URL variable (`DATABASE_URL`, `MYSQL_URL`, `MYSQL_PRIVATE_URL`):
+   - Ensure password special characters are URL-encoded.
+   - Or set `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` explicitly.
+3. Confirm the database name exists in Aiven (often `defaultdb`).
+4. Ensure your service can access Aiven network endpoint (public endpoint or allowed network setup).
