@@ -232,6 +232,41 @@ function TodoBoard({ token, handleLogout }) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addTask(); }
   };
 
+  const applyTaskStatusLocal = (taskId, inProgress, completed) => {
+    setTasks(prev => prev.map(t =>
+      t.id === taskId
+        ? { ...t, inProgress, in_progress: inProgress, completed }
+        : t
+    ));
+  };
+
+  const persistTaskStatus = async (task, nextInProgress, nextCompleted, previous) => {
+    try {
+      const response = await fetch(`${API_URL}/tasks/${task.id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          text: task.text,
+          description: task.description || null,
+          priority: task.priority || 'Medium',
+          deadline: task.deadline || null,
+          in_progress: nextInProgress,
+          completed: nextCompleted
+        })
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) handleLogout();
+        throw new Error(`Failed to update task ${task.id}`);
+      }
+    } catch (error) {
+      // Roll back so UI remains consistent with server state.
+      applyTaskStatusLocal(task.id, previous.inProgress, previous.completed);
+      showToast('Update failed', 'Could not move task. Please try again.', 'error');
+      console.error('Task status update error', error);
+    }
+  };
+
   // ── Toggle task state: TODO → InProgress → Completed → TODO (3-state cycle)
   const toggleTask = async (taskId) => {
     const task = tasks.find(t => t.id === taskId);
@@ -239,6 +274,7 @@ function TodoBoard({ token, handleLogout }) {
 
     const isInProgress = Boolean(task.in_progress) || Boolean(task.inProgress);
     const isCompleted = Boolean(task.completed);
+    const previous = { inProgress: isInProgress, completed: isCompleted };
 
     // Cycle: todo → in_progress → completed → todo
     let newInProgress, newCompleted;
@@ -253,30 +289,9 @@ function TodoBoard({ token, handleLogout }) {
       newInProgress = false; newCompleted = false;
     }
 
-    try {
-      const response = await fetch(`${API_URL}/tasks/${taskId}`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify({
-          text: task.text,
-          description: task.description || null,
-          priority: task.priority || 'Medium',
-          deadline: task.deadline || null,
-          in_progress: newInProgress,
-          completed: newCompleted
-        })
-      });
-
-      if (response.ok) {
-        setTasks(prev => prev.map(t =>
-          t.id === taskId
-            ? { ...t, inProgress: newInProgress, in_progress: newInProgress, completed: newCompleted }
-            : t
-        ));
-      }
-    } catch (error) {
-      console.error('Toggle error', error);
-    }
+    // Optimistic update for instant UX.
+    applyTaskStatusLocal(taskId, newInProgress, newCompleted);
+    await persistTaskStatus(task, newInProgress, newCompleted, previous);
   };
 
   const deleteTask = async (taskId) => {
@@ -361,6 +376,8 @@ function TodoBoard({ token, handleLogout }) {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
     let newInProgress = false; let newCompleted = false;
+    const prevInProgress = Boolean(task.in_progress) || Boolean(task.inProgress);
+    const prevCompleted = Boolean(task.completed);
 
     switch (targetCol) {
       case COLUMN.TODO: break;
@@ -369,25 +386,16 @@ function TodoBoard({ token, handleLogout }) {
       default: return;
     }
 
-    try {
-      const response = await fetch(`${API_URL}/tasks/${task.id}`, {
-        method: 'PUT', headers: authHeaders(),
-        // Fix: send explicit fields, not the raw task object (which has MySQL tinyint 0/1)
-        body: JSON.stringify({
-          text: task.text,
-          description: task.description || null,
-          priority: task.priority || 'Medium',
-          deadline: task.deadline || null,
-          in_progress: newInProgress,
-          completed: newCompleted
-        })
-      });
-      if (response.ok) {
-        setTasks(prev => prev.map(t =>
-          t.id === taskId ? { ...t, inProgress: newInProgress, in_progress: newInProgress, completed: newCompleted } : t
-        ));
-      }
-    } catch (error) { console.error('Drop error', error); }
+    // No-op move, avoid unnecessary network call.
+    if (prevInProgress === newInProgress && prevCompleted === newCompleted) return;
+
+    // Optimistic update for instant drag/drop feedback.
+    applyTaskStatusLocal(taskId, newInProgress, newCompleted);
+
+    await persistTaskStatus(task, newInProgress, newCompleted, {
+      inProgress: prevInProgress,
+      completed: prevCompleted
+    });
   };
 
   // ── Filtering & Rendering ──────────────────────────────────
