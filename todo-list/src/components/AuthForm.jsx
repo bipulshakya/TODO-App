@@ -22,19 +22,23 @@ function AuthForm({ onAuthSuccess }) {
     setLoading(true);
 
     const endpoint = mode === 'login' ? '/auth/login' : '/auth/register';
+    const controller = new AbortController();
+    const timeoutMs = 15000;
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      const normalizedApiUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+      const response = await fetch(`${normalizedApiUrl}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
+        signal: controller.signal,
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         setError(data.error || 'Something went wrong.');
-        setLoading(false);
         return;
       }
 
@@ -44,8 +48,13 @@ function AuthForm({ onAuthSuccess }) {
       localStorage.setItem('auth_is_admin', String(Boolean(data.isAdmin)));
       onAuthSuccess(data.token, data.username, Boolean(data.isAdmin));
     } catch (err) {
-      setError('Could not reach the server. Please try again.');
+      if (err.name === 'AbortError') {
+        setError('Request timed out. Please try again in a moment.');
+      } else {
+        setError('Could not reach the server. Please try again.');
+      }
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
