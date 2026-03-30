@@ -23,6 +23,7 @@ function formatDeadline(deadline) {
 function TaskHistory({ token, handleLogout }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [clearing, setClearing] = useState(false);
   const [filter, setFilter] = useState('all'); // 'all', 'completed', 'deleted'
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -50,6 +51,35 @@ function TaskHistory({ token, handleLogout }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
+  const clearHistory = async () => {
+    if (history.length === 0 || clearing) return;
+
+    const confirmed = window.confirm('Clear all task history entries? This action cannot be undone.');
+    if (!confirmed) return;
+
+    setClearing(true);
+    try {
+      const res = await fetch(`${API_URL}/tasks/history`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+
+      if (res.status === 401) { handleLogout(); return; }
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to clear history');
+      }
+
+      setHistory([]);
+    } catch (err) {
+      console.error('Failed to clear history:', err);
+      window.alert('Could not clear history. Please try again.');
+    } finally {
+      setClearing(false);
+    }
+  };
+
   const filtered = history.filter(item => {
     const matchesFilter = filter === 'all' || item.action === filter;
     const q = searchQuery.toLowerCase();
@@ -69,7 +99,17 @@ function TaskHistory({ token, handleLogout }) {
           <h1 className="history-title">Task History</h1>
           <p className="history-subtitle">A log of all completed and deleted tasks</p>
         </div>
-        <button className="history-refresh-btn" onClick={fetchHistory}>↻ Refresh</button>
+        <div className="history-header-actions">
+          <button className="history-refresh-btn" onClick={fetchHistory}>↻ Refresh</button>
+          <button
+            className="history-clear-btn"
+            onClick={clearHistory}
+            disabled={clearing || history.length === 0}
+            title={history.length === 0 ? 'No history to clear' : 'Clear all history entries'}
+          >
+            {clearing ? 'Clearing...' : '🗑 Clear History'}
+          </button>
+        </div>
       </div>
 
       {/* Stats Strip */}

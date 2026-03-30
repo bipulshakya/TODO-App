@@ -50,6 +50,24 @@ router.get('/history', async (req, res) => {
   }
 });
 
+// Clear all task history entries for the logged-in user
+router.delete('/history', async (req, res) => {
+  try {
+    const [result] = await db.query(
+      'DELETE FROM task_history WHERE user_id = ?',
+      [req.userId]
+    );
+
+    res.json({
+      message: 'Task history cleared successfully',
+      deleted: Number(result.affectedRows || 0)
+    });
+  } catch (error) {
+    console.error('Clear history error:', error);
+    res.status(500).json({ error: 'Failed to clear task history' });
+  }
+});
+
 // Get all tasks for the logged-in user
 router.get('/', async (req, res) => {
   try {

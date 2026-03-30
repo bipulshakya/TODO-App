@@ -47,6 +47,35 @@
   color: var(--text-primary);
 }
 
+.history-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.history-clear-btn {
+  padding: 8px 18px;
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fecaca;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.history-clear-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.24);
+  color: #fee2e2;
+}
+
+.history-clear-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ── Stats Strip ─────────────────────────────────────────────────── */
 .history-stats {
   display: grid;
@@ -301,4 +330,5 @@
 @media (max-width: 640px) {
   .history-stats { grid-template-columns: 1fr; }
   .history-timeline { padding-left: 24px; }
+  .history-header-actions { width: 100%; }
 }
